@@ -1,30 +1,4 @@
 #!/usr/bin/env python3
-"""
-gd_listener.py - listens to your microphone with RealtimeSTT and flags
-Geometry Dash references (level names, mechanics, creators, community terms).
-
-Install:   pip install "RealtimeSTT[faster-whisper]" yt-dlp
-           brew install mpv          (or install ffmpeg; plays the audio)
-Run:       python gd_listener.py
-           python gd_listener.py --no-proxy --play-seconds 0 --volume 60
-           python gd_listener.py --no-play --songs my_songs.txt
-           python gd_listener.py --list-devices
-           python gd_listener.py --device 2 --model small.en --log hits.jsonl
-           python gd_listener.py --words my_terms.txt
-
-How detection works
-  * Every term has a weight. Distinctive names (Tidal Wave, Black Blizzard,
-    Amethyst, Acheron...) weigh 3 and fire on their own.
-  * Ambiguous terms (Time Machine, Zodiac, Cataclysm...) weigh 2 and ambiguous
-    everyday words (wave, cube, ufo, spider...) weigh 1. These only fire when
-    their combined weight inside a rolling window reaches the threshold, so
-    "ocean wave" stays quiet but "wave, ufo, and a spider" does not.
-  * Matching ignores spacing and punctuation ("club step" == "clubstep") and
-    tolerates small Whisper misspellings for longer terms.
-  * Realtime partial text is re-sent constantly, so hits are de-duplicated
-    per utterance.
-"""
-
 import argparse
 import json
 import os
@@ -41,11 +15,6 @@ from datetime import datetime
 from difflib import SequenceMatcher
 from functools import lru_cache
 
-# --------------------------------------------------------------------------
-# Vocabulary
-#   add(weight, "canonical|alias|alias", ...)
-#   Aliases cover common speech-to-text mishearings.
-# --------------------------------------------------------------------------
 TERMS = []
 
 
@@ -56,7 +25,7 @@ def add(weight, *specs):
             TERMS.append((names[0], weight, names))
 
 
-# Weight 3: distinctive on their own (includes the four you named)
+
 add(3,
     "tidal wave|tidal waves",
     "black blizzard",
@@ -100,7 +69,7 @@ add(3,
     "flamewall|flame wall|fire wall|firewall",
     )
 
-# Weight 2: real GD names that are also normal English or just less unique
+
 add(2,
     "bloodbath|blood bath",
     "deadlocked|dead locked",
@@ -130,7 +99,7 @@ add(2,
     "creator points",
     )
 
-# Weight 1: everyday words that are also GD mechanics (need company to fire)
+
 add(1,
     "wave|waves",
     "cube",
@@ -158,9 +127,7 @@ PROMPT = (
 )
 
 
-# --------------------------------------------------------------------------
-# Text matching
-# --------------------------------------------------------------------------
+
 def normalize(text):
     text = text.lower().replace("'", "").replace("\u2019", "")
     return re.sub(r"[^a-z0-9]+", " ", text).split()
@@ -168,10 +135,7 @@ def normalize(text):
 
 PROMPT_TOKENS = set(normalize(PROMPT))
 
-# Terms that are actual levels. Levels are preferred when picking a song, and
-# with --levels-only they are the ONLY terms that play music. By default any
-# detected reference (even a mechanic or creator) is a wildcard that plays
-# whatever YouTube finds for "<term> geometry dash song".
+
 LEVELS = {" ".join(normalize(n)) for n in (
     "tidal wave", "black blizzard", "amethyst", "orbit", "stereo madness",
     "base after base", "clutterfunk", "theory of everything",
@@ -192,8 +156,7 @@ DEFAULT_QUERIES = {
 
 # Clip length in seconds for specific terms (everything else uses --play-seconds)
 DEFAULT_SECONDS = {
-    "tidal wave": 10.0,    # give a term its own clip length (seconds)
-}
+    "tidal wave": 10.0,    # give tidal wave more time since the beginning is really long
 
 
 def is_level(canon):
