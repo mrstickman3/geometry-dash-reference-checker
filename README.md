@@ -8,4 +8,5 @@ Python, RealtimeSTT, and yt-dlp.
 
 # Credits
 yt-dlp - https://github.com/yt-dlp/yt-dlp
+
 RealtimeSTT - https://github.com/KoljaB/RealtimeSTT
