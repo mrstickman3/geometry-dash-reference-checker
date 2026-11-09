@@ -1,5 +1,5 @@
 # geometry-dash-reference-checker
-This is a python script that uses real-time STT to detect Geometry Dash references and play their song.
+This is a python script that uses real-time STT to detect Geometry Dash references and play their song. I think this only works on MacOS.
 
 
 # Dependencies
